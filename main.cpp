@@ -3,7 +3,8 @@
 
 #include "websrv.hpp"
 int main(int argc, char* argv[]){
-    server t;
+    Multi t;
+    t.select_mult();
 
     return 0;
 }

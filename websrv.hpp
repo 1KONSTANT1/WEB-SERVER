@@ -9,14 +9,17 @@
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <signal.h>
-#include <poll.h>
+#include <sys/select.h>
 #include <iostream>
+using namespace std;
 class Multi{
     private:
         struct sockaddr_in own_addr;
         int sock;
         int port;
         int newsock;
+        fd_set observ_sockets, ready_sockets;
+        int res;
     public:
         // Здесь создается сокет, потом bind, затем listen
         Multi();
@@ -25,12 +28,12 @@ class Multi{
         
         //setters
         void set_ip_addr();
-        void set_portnum();
+        void set_portnum(char * s);
 
 
 };
 
-class Server: public multi{ 
+class Server: public Multi{ 
     Server();
     void set_type_of_multi();
 };
