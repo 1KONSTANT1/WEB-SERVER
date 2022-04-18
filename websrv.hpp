@@ -29,7 +29,7 @@ class Multi{
         int res;
         string json;
         string m_file;
-        const char * strr;
+        char * strr;
         uint round;
         char* hash;
     public:
@@ -43,7 +43,7 @@ class Multi{
         void set_portnum(char * s);
         string get_json(char* s);
         int json_handler(string json);
-        char * hash_func(uint a, char * j);
+        char * hash_func(uint a,char * j);
 
 
 };

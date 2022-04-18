@@ -60,9 +60,23 @@
                     json = get_json(str);
                     //cout<< endl<< json;
                     if(json_handler(json)){
-
-                        char *hello = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-                        write(newsock, hello, strlen(hello));
+                        hash = hash_func(round,strr);
+                        cout<< hash<<endl;
+                        string hello = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: ";
+                        string answ = "{\n  \"str\": \"";
+                        stringstream ss;
+                        ss << round;
+                        string chis = ss.str();
+                        answ = answ + strr +"\",\n  \"rounds\": " + chis+",\n  \"sha512\": \""+ hash +"\"\n}";
+                        cout<< answ << endl;
+                        stringstream sss;
+                        sss << answ.length();
+                        chis = sss.str();
+                        hello = hello + chis +"\n\n" + answ;
+                        //cout << hello << endl;
+                        char * t;
+                        t = &hello[0];
+                        write(newsock, t, strlen(t));
                     }
                     else{
                         write(newsock, errstr, strlen(errstr));
@@ -103,7 +117,7 @@
      stringstream jsomEncoded(json);
      pt::read_json(jsomEncoded, tree);
      m_file =tree.get<string>("str");
-     strr =  m_file.data();
+     strr =  &m_file[0];
      round = tree.get("rounds",0);
      if( round == 0) return 0;
      cout<<round<< endl;
@@ -113,24 +127,8 @@
      catch( exception & x){
          return 0;
      }
-     /*const char* str = json.data();
-     cout<< str<< endl;
-     list = NULL;
-     list = new node;
-     int fl = 0;
-     while(1){
-         if(fl){
-
-         }
-         if(*str == '/"'){
-             fl = 1;
-         }
-         str++;
-     }
-*/
  }
- char* Multi::hash_func(uint a, char * j){
-     hash = j;
+ char* Multi::hash_func(uint a,char * j){
      for(uint i =0; i< a; i++){
          j = crypt(j,"$6$");
          j = j+4;
