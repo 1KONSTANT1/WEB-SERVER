@@ -12,7 +12,11 @@
 #include <sys/select.h>
 #include <iostream>
 #include <string>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+namespace pt = boost::property_tree;
 using namespace std;
+
 class Multi{
     private:
         struct sockaddr_in own_addr;
@@ -21,6 +25,13 @@ class Multi{
         int newsock;
         fd_set observ_sockets, ready_sockets;
         int res;
+        string json;
+        typedef struct Node * list;
+        struct Node{
+            char* key;
+            char* data;
+            list next;
+        }node;
     public:
         // Здесь создается сокет, потом bind, затем listen
         Multi();
@@ -31,6 +42,7 @@ class Multi{
         void set_ip_addr();
         void set_portnum(char * s);
         string get_json(char* s);
+        void json_handler(string json);
 
 
 };
