@@ -2,16 +2,17 @@
 
 #include "websrv.hpp"
 
- Multi::Multi(){
+ Multi::Multi(char * adres, char* pt, char * typpe){
      // создаем сокет 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0))< 0)
     {
         perror("can't create socket\n");
         exit(-1);
     }
+    port = atoi(pt);
     own_addr.sin_family = AF_INET; 
-    own_addr.sin_addr.s_addr = INADDR_ANY;
-    own_addr.sin_port = htons(8081);
+    inet_pton(AF_INET, adres, &(own_addr.sin_addr));
+    own_addr.sin_port = htons(port);
     // закрепляем адресс за сокетом
     if (bind(sock, (struct sockaddr *) &own_addr,sizeof(own_addr)) < 0)
     {
@@ -52,12 +53,24 @@
              if(fork() ==0){
                  char  str[60000] = {0};
                  read(newsock ,str, 60000);
-                 cout<< str<< endl;
-                 json = get_json(str);
-                 //cout<< endl<< json;
-                 json_handler(json);
-                 char *hello = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-                 write(newsock, hello, strlen(hello));
+                 char * errstr = "HTTP/1.0 409 Conflict\nContent-Type: text/plain\nContent-Length: 0\n\n";
+                 //strcpy(errstr,"HTTP/1.0 409 Conflict\nContent-Type: text/plain\nContent-Length: 0\n");
+                 if( (str[0] == 'P') && (str[1] == 'O')){
+                     cout<< str<< endl;
+                    json = get_json(str);
+                    //cout<< endl<< json;
+                    if(json_handler(json)){
+
+                        char *hello = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+                        write(newsock, hello, strlen(hello));
+                    }
+                    else{
+                        write(newsock, errstr, strlen(errstr));
+                    }
+                 }
+                 else{
+                    write(newsock, errstr, strlen(errstr));
+                 }
                  exit(0);
              }
 
@@ -84,13 +97,22 @@
      
 
  }
- void Multi:: json_handler(string json){
+ int Multi:: json_handler(string json){
+     try{
      pt::ptree tree;
      stringstream jsomEncoded(json);
      pt::read_json(jsomEncoded, tree);
-     string m_file;
-     m_file = tree.get<string>("str");
-     cout<< m_file<< "   Yahoo"<< endl;
+     m_file =tree.get<string>("str");
+     strr =  m_file.data();
+     round = tree.get("rounds",0);
+     if( round == 0) return 0;
+     cout<<round<< endl;
+     cout<< strr << endl;
+     return 1;
+     }
+     catch( exception & x){
+         return 0;
+     }
      /*const char* str = json.data();
      cout<< str<< endl;
      list = NULL;
@@ -106,4 +128,12 @@
          str++;
      }
 */
+ }
+ char* Multi::hash_func(uint a, char * j){
+     hash = j;
+     for(uint i =0; i< a; i++){
+         j = crypt(j,"$6$");
+         j = j+4;
+     }
+     return j;
  }
