@@ -11,7 +11,7 @@
     }
     own_addr.sin_family = AF_INET; 
     own_addr.sin_addr.s_addr = INADDR_ANY;
-    own_addr.sin_port = htons(8081);
+    own_addr.sin_port = htons(8083);
     // закрепляем адресс за сокетом
     if (bind(sock, (struct sockaddr *) &own_addr,sizeof(own_addr)) < 0)
     {
@@ -50,9 +50,11 @@
                 exit(-1);
              }
              if(fork() ==0){
-                 char  str[30000] = {0};
-                 read(newsock ,str, 30000);
+                 char  str[60000] = {0};
+                 read(newsock ,str, 60000);
                  cout<< str<< endl;
+                 cout<< endl<< get_json(str);
+                 write(newsock, str, 60000);
                  exit(0);
              }
 
@@ -61,4 +63,21 @@
         
 
      }
+ }
+ string Multi:: get_json(char* s){
+     string json;
+     int fl = 0;
+     while(1){
+         if(fl){
+             json.push_back(*s);
+         }
+         if(*s == '\n'){
+             if(*(s+1) == '{') fl = 1;
+         }
+         if(fl && (*s == '}')) break;
+         s++;
+     }
+     return json;
+     
+
  }

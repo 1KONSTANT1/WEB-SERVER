@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <sys/select.h>
 #include <iostream>
+#include <string>
 using namespace std;
 class Multi{
     private:
@@ -29,6 +30,7 @@ class Multi{
         //setters
         void set_ip_addr();
         void set_portnum(char * s);
+        string get_json(char* s);
 
 
 };
