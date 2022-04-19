@@ -15,7 +15,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include<cstring>
 #include <arpa/inet.h>
-
+#include<crypt.h>
 namespace pt = boost::property_tree;
 using namespace std;
 
@@ -24,14 +24,12 @@ class Multi{
         struct sockaddr_in own_addr;
         int sock;
         int port;
-        int newsock;
-        fd_set observ_sockets, ready_sockets;
         int res;
-        string json;
-        string m_file;
-        char * strr;
-        uint round;
-        char* hash;
+
+
+        int newsock;
+
+        fd_set observ_sockets, ready_sockets;
     public:
         // Здесь создается сокет, потом bind, затем listen
         Multi(char * adres, char* pt, char * typpe);
@@ -41,15 +39,17 @@ class Multi{
         //setters
         void set_ip_addr();
         void set_portnum(char * s);
+
+
         string get_json(char* s);
-        int json_handler(string json);
+        int json_handler(string json,char ** strr, uint *round);
         char * hash_func(uint a,char * j);
 
 
 };
 
 class Server: public Multi{ 
-    Server();
+    Server(char * adres, char* pt, char * typpe);
     void set_type_of_multi();
 };
 #endif

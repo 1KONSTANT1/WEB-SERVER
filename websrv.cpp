@@ -9,6 +9,11 @@
         perror("can't create socket\n");
         exit(-1);
     }
+
+
+
+
+
     port = atoi(pt);
     own_addr.sin_family = AF_INET; 
     inet_pton(AF_INET, adres, &(own_addr.sin_addr));
@@ -27,10 +32,10 @@
     }
  }
 
- void Multi::set_portnum(char* s){
+ /*void Multi::set_portnum(char* s){
      port = atoi(s);
      cout<< port<<endl;
- }
+ }*/
 
  void Multi::select_mult(){
      FD_ZERO(&observ_sockets);
@@ -51,24 +56,31 @@
                 exit(-1);
              }
              if(fork() ==0){
+                 char * strr;
+                 uint round;
+                 char* hash;
+                 string json;
                  char  str[60000] = {0};
                  read(newsock ,str, 60000);
-                 char * errstr = "HTTP/1.0 409 Conflict\nContent-Type: text/plain\nContent-Length: 0\n\n";
+                 string errstrr = "HTTP/1.0 409 Conflict\nContent-Type: text/plain\nContent-Length: 0\n\n";
+                 char * errstr = &errstrr[0];
                  //strcpy(errstr,"HTTP/1.0 409 Conflict\nContent-Type: text/plain\nContent-Length: 0\n");
                  if( (str[0] == 'P') && (str[1] == 'O')){
-                     cout<< str<< endl;
+                     //cout<< str<< endl;
+
                     json = get_json(str);
+
                     //cout<< endl<< json;
-                    if(json_handler(json)){
+                    if(json_handler(json, &strr, &round)){
                         hash = hash_func(round,strr);
-                        cout<< hash<<endl;
+                       // cout<< hash<<endl;
                         string hello = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: ";
                         string answ = "{\n  \"str\": \"";
                         stringstream ss;
                         ss << round;
                         string chis = ss.str();
                         answ = answ + strr +"\",\n  \"rounds\": " + chis+",\n  \"sha512\": \""+ hash +"\"\n}";
-                        cout<< answ << endl;
+                        //cout<< answ << endl;
                         stringstream sss;
                         sss << answ.length();
                         chis = sss.str();
@@ -111,17 +123,19 @@
      
 
  }
- int Multi:: json_handler(string json){
+ int Multi:: json_handler(string json,char ** strr, uint *round){
+     
      try{
+    string m_file;
      pt::ptree tree;
      stringstream jsomEncoded(json);
      pt::read_json(jsomEncoded, tree);
      m_file =tree.get<string>("str");
-     strr =  &m_file[0];
-     round = tree.get("rounds",0);
-     if( round == 0) return 0;
-     cout<<round<< endl;
-     cout<< strr << endl;
+     *strr =  &m_file[0];
+     *round = tree.get("rounds",0);
+     if( *round == 0) return 0;
+     //cout<<round<< endl;
+     //cout<< strr << endl;
      return 1;
      }
      catch( exception & x){
@@ -129,8 +143,10 @@
      }
  }
  char* Multi::hash_func(uint a,char * j){
+      struct crypt_data dat;
+        dat.initialized = 0;
      for(uint i =0; i< a; i++){
-         j = crypt(j,"$6$");
+         j = crypt_r(j,"$6$",(struct crypt_data *)&dat);
          j = j+4;
      }
      return j;
